@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { FiPlus, FiSend, FiEdit } from "react-icons/fi";
+import Select from "react-select";
+import { FiClock, FiSend, FiEdit, FiTrash2 } from "react-icons/fi";
 
 // Sample data
 const sampleCustomers = [
@@ -9,48 +10,94 @@ const sampleCustomers = [
 ];
 
 const sampleTemplates = [
-  { id: 1, title: "New Month Message", content: "Hello {customerName}, Happy New Month!" },
-  { id: 2, title: "Birthday Wishes", content: "Happy Birthday {customerName}!" },
+  { id: 1, title: "New Month Promo" },
+  { id: 2, title: "Birthday Wishes" },
 ];
 
 const CampaignPage = () => {
-  const [title, setTitle] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState("");
   const [selectedCustomers, setSelectedCustomers] = useState([]);
-  const [scheduledDate, setScheduledDate] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
-  const [autoSend, setAutoSend] = useState(true);
+  const [autoSend, setAutoSend] = useState(false);
   const [campaigns, setCampaigns] = useState([]);
+  const [editingCampaign, setEditingCampaign] = useState(null);
 
-  const toggleCustomer = (id) => {
-    if (selectedCustomers.includes(id)) {
-      setSelectedCustomers(selectedCustomers.filter((c) => c !== id));
-    } else {
-      setSelectedCustomers([...selectedCustomers, id]);
-    }
+  const customerOptions = sampleCustomers.map((c) => ({
+    value: c.id,
+    label: `${c.name} (${c.phone})`,
+  }));
+
+  const templateOptions = sampleTemplates.map((t) => ({
+    value: t.id,
+    label: t.title,
+  }));
+
+  const resetForm = () => {
+    setSelectedCustomers([]);
+    setSelectedTemplate("");
+    setScheduledTime("");
+    setAutoSend(false);
+    setEditingCampaign(null);
   };
 
-  const handleCreateCampaign = () => {
-    if (!title || !selectedTemplate || selectedCustomers.length === 0 || !scheduledDate || !scheduledTime) {
-      return alert("Please fill in all required fields.");
+  const handleCreateOrUpdateCampaign = () => {
+    if (!selectedTemplate || !scheduledTime || selectedCustomers.length === 0)
+      return alert("Fill all fields and select at least one customer.");
+
+    if (editingCampaign) {
+      // Update existing campaign
+      setCampaigns(
+        campaigns.map((c) =>
+          c.id === editingCampaign.id
+            ? {
+                ...c,
+                title: sampleTemplates.find((t) => t.id === selectedTemplate).title,
+                customers: selectedCustomers.map(
+                  (id) => sampleCustomers.find((c) => c.id === id).name
+                ),
+                time: scheduledTime,
+                autoSend,
+              }
+            : c
+        )
+      );
+      alert("Campaign updated successfully!");
+    } else {
+      // Create new campaign
+      const newCampaign = {
+        id: campaigns.length + 1,
+        title: sampleTemplates.find((t) => t.id === selectedTemplate).title,
+        customers: selectedCustomers.map(
+          (id) => sampleCustomers.find((c) => c.id === id).name
+        ),
+        time: scheduledTime,
+        autoSend,
+      };
+      setCampaigns([...campaigns, newCampaign]);
+      alert("Campaign created successfully!");
     }
 
-    const newCampaign = {
-      id: campaigns.length + 1,
-      title,
-      template: sampleTemplates.find((t) => t.id === parseInt(selectedTemplate)),
-      customers: selectedCustomers.map((id) => sampleCustomers.find((c) => c.id === id).name),
-      scheduledAt: `${scheduledDate} ${scheduledTime}`,
-      autoSend,
-    };
+    resetForm();
+  };
 
-    setCampaigns([...campaigns, newCampaign]);
-    setTitle("");
-    setSelectedTemplate("");
-    setSelectedCustomers([]);
-    setScheduledDate("");
-    setScheduledTime("");
-    alert("Campaign created successfully!");
+  const handleEditCampaign = (campaign) => {
+    setEditingCampaign(campaign);
+    setSelectedTemplate(
+      sampleTemplates.find((t) => t.title === campaign.title).id
+    );
+    setSelectedCustomers(
+      campaign.customers.map(
+        (name) => sampleCustomers.find((c) => c.name === name).id
+      )
+    );
+    setScheduledTime(campaign.time);
+    setAutoSend(campaign.autoSend);
+  };
+
+  const handleDeleteCampaign = (id) => {
+    if (window.confirm("Are you sure you want to delete this campaign?")) {
+      setCampaigns(campaigns.filter((c) => c.id !== id));
+    }
   };
 
   return (
@@ -59,117 +106,110 @@ const CampaignPage = () => {
 
       {/* Campaign Form */}
       <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
-        <h2 className="text-xl font-semibold">Create Campaign</h2>
+        <h2 className="text-xl font-semibold">
+          {editingCampaign ? "Edit Campaign" : "Create New Campaign"}
+        </h2>
 
-        {/* Title */}
+        {/* Template Select */}
         <div>
-          <label className="font-semibold">Campaign Title:</label>
-          <input
-            type="text"
-            className="w-full border rounded-lg p-2 mt-1"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g., Birthday Campaign"
+          <label className="font-semibold">Select Template:</label>
+          <Select
+            options={templateOptions}
+            value={templateOptions.find((t) => t.value === selectedTemplate)}
+            onChange={(selected) => setSelectedTemplate(selected.value)}
+            placeholder="Select template..."
+            className="mt-1"
           />
         </div>
 
-        {/* Template Selection */}
-        <div>
-          <label className="font-semibold">Select Template:</label>
-          <select
-            className="w-full border rounded-lg p-2 mt-1"
-            value={selectedTemplate}
-            onChange={(e) => setSelectedTemplate(e.target.value)}
-          >
-            <option value="">-- Select Template --</option>
-            {sampleTemplates.map((t) => (
-              <option key={t.id} value={t.id}>{t.title}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Customer Selection */}
+        {/* Customer Multi-Select */}
         <div>
           <label className="font-semibold">Select Customers:</label>
-          <div className="flex flex-wrap gap-2 mt-1">
-            {sampleCustomers.map((customer) => (
-              <button
-                key={customer.id}
-                onClick={() => toggleCustomer(customer.id)}
-                className={`px-3 py-1 rounded-lg border ${
-                  selectedCustomers.includes(customer.id) ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700"
-                }`}
-              >
-                {customer.name}
-              </button>
-            ))}
-          </div>
+          <Select
+            isMulti
+            options={customerOptions}
+            value={customerOptions.filter((c) =>
+              selectedCustomers.includes(c.value)
+            )}
+            onChange={(selected) =>
+              setSelectedCustomers(selected.map((s) => s.value))
+            }
+            className="mt-1"
+            placeholder="Select customers..."
+          />
         </div>
 
-        {/* Scheduled Date & Time */}
-        <div className="flex flex-col md:flex-row gap-2">
-          <div className="flex-1">
-            <label className="font-semibold">Scheduled Date:</label>
-            <input
-              type="date"
-              className="w-full border rounded-lg p-2 mt-1"
-              value={scheduledDate}
-              onChange={(e) => setScheduledDate(e.target.value)}
-            />
-          </div>
-          <div className="flex-1">
-            <label className="font-semibold">Scheduled Time:</label>
-            <input
-              type="time"
-              className="w-full border rounded-lg p-2 mt-1"
-              value={scheduledTime}
-              onChange={(e) => setScheduledTime(e.target.value)}
-            />
-          </div>
+        {/* Scheduled Time */}
+        <div>
+          <label className="font-semibold">Scheduled Time:</label>
+          <input
+            type="datetime-local"
+            className="border px-3 py-2 rounded-lg w-full mt-1"
+            value={scheduledTime}
+            onChange={(e) => setScheduledTime(e.target.value)}
+          />
         </div>
 
-        {/* Auto Send */}
+        {/* Auto Send Toggle */}
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={autoSend}
             onChange={(e) => setAutoSend(e.target.checked)}
             id="autoSend"
+            className="w-4 h-4"
           />
-          <label htmlFor="autoSend" className="font-semibold">Send Automatically</label>
+          <label htmlFor="autoSend" className="font-semibold">
+            Auto Send
+          </label>
         </div>
 
         <button
-          onClick={handleCreateCampaign}
+          onClick={handleCreateOrUpdateCampaign}
           className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-2"
         >
-          <FiPlus /> Create Campaign
+          <FiSend /> {editingCampaign ? "Update Campaign" : "Create Campaign"}
         </button>
       </div>
 
-      {/* Campaign List */}
-      <div className="bg-white shadow-lg rounded-2xl p-6">
-        <h2 className="text-xl font-semibold mb-4">Scheduled Campaigns</h2>
-        {campaigns.length === 0 ? (
-          <p>No campaigns scheduled yet.</p>
-        ) : (
-          <div className="space-y-2">
-            {campaigns.map((c) => (
-              <div key={c.id} className="border rounded-lg p-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-                <div>
-                  <p className="font-semibold">{c.title}</p>
-                  <p className="text-gray-600 text-sm">
-                    Template: {c.template.title} | Recipients: {c.customers.join(", ")}
-                  </p>
-                  <p className="text-gray-600 text-sm">Scheduled At: {c.scheduledAt} | Auto-send: {c.autoSend ? "Yes" : "No"}</p>
-                </div>
-                <button className="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                  <FiEdit />
-                </button>
-              </div>
-            ))}
+      {/* Created Campaigns */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {campaigns.map((c) => (
+          <div
+            key={c.id}
+            className="bg-white shadow-lg rounded-2xl p-4 flex flex-col gap-2 relative"
+          >
+            <h3 className="font-semibold text-lg">{c.title}</h3>
+            <p className="text-sm text-gray-600">
+              <FiClock className="inline mr-1" />{" "}
+              {new Date(c.time).toLocaleString()}
+            </p>
+            <p className="text-sm">
+              Customers: {c.customers.join(", ")}
+            </p>
+            <p
+              className={`font-semibold ${
+                c.autoSend ? "text-green-600" : "text-yellow-600"
+              }`}
+            >
+              {c.autoSend ? "Auto Send Enabled" : "Manual Send"}
+            </p>
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={() => handleEditCampaign(c)}
+                className="flex items-center gap-1 text-purple-600 hover:text-purple-800"
+              >
+                <FiEdit /> Edit
+              </button>
+              <button
+                onClick={() => handleDeleteCampaign(c.id)}
+                className="flex items-center gap-1 text-red-600 hover:text-red-800"
+              >
+                <FiTrash2 /> Delete
+              </button>
+            </div>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );
