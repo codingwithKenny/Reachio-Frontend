@@ -1,12 +1,73 @@
-# React + Vite
+# Business Automation Tool - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern **React + Tailwind CSS frontend** for a business automation tool designed to help business owners **reach out to customers automatically via SMS**. This interface allows users to manage customers, compose and schedule messages, and run campaigns efficiently.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🎯 Features
 
-## Expanding the ESLint configuration
+### Customer Management
+- Add, edit, and track customer information
+- View stats: total, active, inactive, recently added customers
+- Manage customer lists easily with search and filters
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+![Customer Management Screenshot](./assets/customer-management.png)
+
+### Messaging Automation
+- Compose single or bulk messages
+- AI-assisted message generation (e.g., ChatGPT API)
+- Queue messages for later sending
+- Track message status: PENDING, SENT, FAILED
+
+![Message Automation Screenshot](./assets/message-automation.png)
+
+### Campaign Management
+- Schedule campaigns for specific dates and times
+- Select templates and target customers
+- Automatic sending for birthdays, new month greetings, promotions, and more
+- View campaign history with status and sent time
+
+![Campaign Management Screenshot](./assets/campaign-management.png)
+
+### Dashboard & Stats
+- Real-time stats on customers, campaigns, messages, and revenue
+- Interactive charts for growth tracking
+- Recent activity logs for transparency
+
+![Dashboard Screenshot](./assets/dashboard.png)
+
+### UI & Responsiveness
+- Fully responsive, mobile-first design
+- Modular components for easier maintenance and scalability
+- Tailwind CSS for fast and consistent styling
+- Recharts for visualizing stats
+
+---
+
+## 🚀 Demo
+You can include a GIF to show the tool in action:
+
+![App Demo](./assets/demo.gif)
+
+---
+
+## 🛠 Tech Stack
+- **Frontend:** React.js, Tailwind CSS
+- **Charts:** Recharts
+- **Icons:** React Icons
+- **Forms & Validation:** React Hook Form, Zod
+
+---
+
+## ⚡ Getting Started
+
+### Prerequisites
+- Node.js >= 18
+- npm or yarn
+
+### Installation
+```bash
+git clone https://github.com/yourusername/business-automation-frontend.git
+cd business-automation-frontend
+npm install
+npm run dev
