@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import Select from "react-select";
-import { FiClock, FiSend, FiEdit, FiTrash2 } from "react-icons/fi";
+import CampaignForm from "../components/Campaign/CampaignForm";
+import CampaignCard from "../components/Campaign/CampaignCard";
+
 
 // Sample data
 const sampleCustomers = [
@@ -45,7 +46,6 @@ const CampaignPage = () => {
       return alert("Fill all fields and select at least one customer.");
 
     if (editingCampaign) {
-      // Update existing campaign
       setCampaigns(
         campaigns.map((c) =>
           c.id === editingCampaign.id
@@ -63,7 +63,6 @@ const CampaignPage = () => {
       );
       alert("Campaign updated successfully!");
     } else {
-      // Create new campaign
       const newCampaign = {
         id: campaigns.length + 1,
         title: sampleTemplates.find((t) => t.id === selectedTemplate).title,
@@ -104,111 +103,29 @@ const CampaignPage = () => {
     <div className="p-6 md:p-10 space-y-6">
       <h1 className="text-2xl md:text-3xl font-bold">Campaigns</h1>
 
-      {/* Campaign Form */}
-      <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
-        <h2 className="text-xl font-semibold">
-          {editingCampaign ? "Edit Campaign" : "Create New Campaign"}
-        </h2>
+      <CampaignForm
+        selectedTemplate={selectedTemplate}
+        setSelectedTemplate={setSelectedTemplate}
+        selectedCustomers={selectedCustomers}
+        setSelectedCustomers={setSelectedCustomers}
+        scheduledTime={scheduledTime}
+        setScheduledTime={setScheduledTime}
+        autoSend={autoSend}
+        setAutoSend={setAutoSend}
+        handleSubmit={handleCreateOrUpdateCampaign}
+        editingCampaign={editingCampaign}
+        templateOptions={templateOptions}
+        customerOptions={customerOptions}
+      />
 
-        {/* Template Select */}
-        <div>
-          <label className="font-semibold">Select Template:</label>
-          <Select
-            options={templateOptions}
-            value={templateOptions.find((t) => t.value === selectedTemplate)}
-            onChange={(selected) => setSelectedTemplate(selected.value)}
-            placeholder="Select template..."
-            className="mt-1"
-          />
-        </div>
-
-        {/* Customer Multi-Select */}
-        <div>
-          <label className="font-semibold">Select Customers:</label>
-          <Select
-            isMulti
-            options={customerOptions}
-            value={customerOptions.filter((c) =>
-              selectedCustomers.includes(c.value)
-            )}
-            onChange={(selected) =>
-              setSelectedCustomers(selected.map((s) => s.value))
-            }
-            className="mt-1"
-            placeholder="Select customers..."
-          />
-        </div>
-
-        {/* Scheduled Time */}
-        <div>
-          <label className="font-semibold">Scheduled Time:</label>
-          <input
-            type="datetime-local"
-            className="border px-3 py-2 rounded-lg w-full mt-1"
-            value={scheduledTime}
-            onChange={(e) => setScheduledTime(e.target.value)}
-          />
-        </div>
-
-        {/* Auto Send Toggle */}
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={autoSend}
-            onChange={(e) => setAutoSend(e.target.checked)}
-            id="autoSend"
-            className="w-4 h-4"
-          />
-          <label htmlFor="autoSend" className="font-semibold">
-            Auto Send
-          </label>
-        </div>
-
-        <button
-          onClick={handleCreateOrUpdateCampaign}
-          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-2"
-        >
-          <FiSend /> {editingCampaign ? "Update Campaign" : "Create Campaign"}
-        </button>
-      </div>
-
-      {/* Created Campaigns */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {campaigns.map((c) => (
-          <div
+          <CampaignCard
             key={c.id}
-            className="bg-white shadow-lg rounded-2xl p-4 flex flex-col gap-2 relative"
-          >
-            <h3 className="font-semibold text-lg">{c.title}</h3>
-            <p className="text-sm text-gray-600">
-              <FiClock className="inline mr-1" />{" "}
-              {new Date(c.time).toLocaleString()}
-            </p>
-            <p className="text-sm">
-              Customers: {c.customers.join(", ")}
-            </p>
-            <p
-              className={`font-semibold ${
-                c.autoSend ? "text-green-600" : "text-yellow-600"
-              }`}
-            >
-              {c.autoSend ? "Auto Send Enabled" : "Manual Send"}
-            </p>
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={() => handleEditCampaign(c)}
-                className="flex items-center gap-1 text-purple-600 hover:text-purple-800"
-              >
-                <FiEdit /> Edit
-              </button>
-              <button
-                onClick={() => handleDeleteCampaign(c.id)}
-                className="flex items-center gap-1 text-red-600 hover:text-red-800"
-              >
-                <FiTrash2 /> Delete
-              </button>
-            </div>
-          </div>
+            campaign={c}
+            handleEdit={handleEditCampaign}
+            handleDelete={handleDeleteCampaign}
+          />
         ))}
       </div>
     </div>

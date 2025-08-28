@@ -8,15 +8,15 @@ import Topbar from "../components/Common/Topbar";
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+  // const handleLogout = () => {
+  //   localStorage.removeItem("token");
+  //   navigate("/login");
+  // };
 
   return (
     <div className="flex h-screen rounded-3xl bg-purple-100">
       {/* Sidebar */}
-      <Sidebar handleLogout={handleLogout} />
+      <Sidebar />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden ml-20 md:ml-64">

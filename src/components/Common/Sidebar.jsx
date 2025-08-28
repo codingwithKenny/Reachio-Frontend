@@ -32,8 +32,8 @@ export default function Sidebar() {
   };
   function handleLogout() {
   // 1. Remove any authentication tokens or user info
-  localStorage.removeItem("authToken"); // or whatever key you use
-  sessionStorage.removeItem("authToken");
+  localStorage.removeItem("token"); // or whatever key you use
+  sessionStorage.removeItem("token");
 
   // 2. Optionally clear other user-related data
   localStorage.removeItem("userData");

@@ -1,41 +1,40 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 
-import LandingPage from "./pages/LandingPage"; // optional landing page
-import Messages from "./pages/Messages";
-import Leaflet from "./pages/Leaflet";
-import NotFound from "./pages/NotFound";
+// Pages
+import LandingPage from "./pages/LandingPage";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
+import Dashboard from "./Pages/Dashboard";
 import Home from "./Pages/Home";
 import CustomerDetails from "./Pages/CustomerDetails";
-import Dashboard from "./Pages/Dashboard";
-import Template from "./Pages/Template";
+import Messages from "./Pages/Messages";
+import Leaflet from "./Pages/Leaflet";
 import Campaign from "./Pages/Campaign";
+import Template from "./Pages/Template";
+import NotFound from "./pages/NotFound";
 
-// privateRoute- wrapper for protected route(DASHBORD)
+// PrivateRoute wrapper
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
-  const isLoggedIn = !!token; // true if token exists
-  return isLoggedIn ? children : <Navigate to="/login" />;
+  return token ? children : <Navigate to="/login" />;
 };
-
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Landing / public pages */}
+        {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
- 
-        {/* Protected dashboard */}
+
+        {/* Protected dashboard routes */}
         <Route
-          path="/dashboard"
+          path="/dashboard/*"
           element={
             <PrivateRoute>
-              <Dashboard />
+              <Dashboard /> {/* Your Dashboard already has <Outlet /> */}
             </PrivateRoute>
           }
         >
