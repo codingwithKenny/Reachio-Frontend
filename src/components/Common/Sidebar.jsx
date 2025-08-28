@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FiHome,
@@ -10,37 +10,93 @@ import {
   FiLogOut,
   FiPlus,
   FiChevronDown,
+  FiEdit,
+  FiTrash2,
 } from "react-icons/fi";
+import axios from "axios";
 
 export default function Sidebar() {
-    const navigate = useNavigate();
+     const navigate = useNavigate();
+       const dropdownRef = useRef(null);
 
-  const [businesses, setBusinesses] = useState([
-    "My First Business",
-    "Second Biz",
-  ]);
+
+  // keep businesses from backend
+  const [businesses, setBusinesses] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [newBusiness, setNewBusiness] = useState("");
+  const [error, setError] =useState('')
 
-  const handleAddBusiness = () => {
-    if (newBusiness.trim() && !businesses.includes(newBusiness.trim())) {
-      setBusinesses([...businesses, newBusiness.trim()]);
-      setNewBusiness("");
-      setShowModal(false);
+  // Example: get userId from localStorage (after login you probably store it)
+  const user = JSON.parse(localStorage.getItem("user"));
+// console.log(user.id); // now it should log 7
+const userId = user.id
+
+
+  // Load existing businesses when sidebar mounts
+useEffect(() => {
+  const fetchBusinesses = async () => {
+    if (!userId) return; // skip if no userId
+
+    try {
+      const res = await axios.get(`http://localhost:5000/api/business?userId=${userId}`);
+      if (res.data && res.data.length > 0) {
+        setBusinesses(res.data);
+      } else {
+        setBusinesses([]);
+        console.log("No businesses found for this user.");
+      }
+    } catch (err) {
+      console.error("Failed to load businesses:", err);
+      setBusinesses([]); // ensure UI doesn't break
     }
   };
+
+  fetchBusinesses();
+}, [userId]);
+
+
+
+  // Add new business
+const handleAddBusiness = async () => {
+  if (newBusiness.trim()) {
+    try {
+      const res = await axios.post("http://localhost:5000/api/business", {
+        name: newBusiness.trim(),
+        userId: parseInt(user.id),
+      });
+
+      // update UI
+      setBusinesses((prev) => [...prev, res.data]);
+      setNewBusiness("");
+      setShowModal(false);
+      setError(""); // clear any previous error
+
+      setTimeout(() => {
+        if (dropdownRef.current) {
+          dropdownRef.current.scrollTop = dropdownRef.current.scrollHeight;
+        }
+      }, 10);
+    } catch (err) {
+      // Get message from backend response
+      if (err.response && err.response.data && err.response.data.error) {
+        setError(err.response.data.error);
+      } else {
+        setError("Something went wrong");
+      }
+    }
+  }
+};
+
+
+
   function handleLogout() {
-  // 1. Remove any authentication tokens or user info
-  localStorage.removeItem("token"); // or whatever key you use
-  sessionStorage.removeItem("token");
+    localStorage.removeItem("token");
+    localStorage.removeItem("userData");
+    sessionStorage.removeItem("token");
+    navigate("/login");
+  }
 
-  // 2. Optionally clear other user-related data
-  localStorage.removeItem("userData");
-
-  // 3. Redirect the user to login page
-  navigate("/login");
-}
 
   return (
     <aside
@@ -73,34 +129,62 @@ export default function Sidebar() {
     </button>
 
     {showDropdown && (
-      <div className="ml-0 md:ml-4 mt-3 flex flex-col gap-2 p-3 rounded-xl bg-white/10 shadow-inner border border-white/20">
-        {/* List of businesses */}
-        <Link
-          to="/dashboard/businesses/my-first-business"
-          className="flex items-center justify-center md:justify-start gap-2 px-3 py-2 rounded-lg text-sm font-medium italic text-purple-900 bg-white shadow-md hover:shadow-lg hover:bg-purple-100 transition-all duration-200"
-        >
-          <FiBriefcase size={14} className="text-purple-600" />
-          <span className="hidden md:inline">My First Business</span>
-        </Link>
+  <div
+  ref={dropdownRef}
+      className="ml-0 md:ml-4 mt-3 flex flex-col gap-2 p-3 rounded-xl bg-white/10 shadow-inner border border-white/20 max-h-32 overflow-y-auto">    {/* List of businesses */}
+    {businesses.length === 0 ? (
+      <p className="text-sm text-white/70 italic">No businesses found.</p>
+    ) : (
+ businesses.map((biz) => (
+  <div
+    key={biz.id}
+    className="flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium italic text-purple-900 bg-white shadow-md hover:shadow-lg hover:bg-purple-100 transition-all duration-200"
+  >
+    {/* Business name and link */}
+    <Link
+      to={`/dashboard/businesses/${biz.id}`}
+      className="flex items-center gap-2 flex-1"
+    >
+      <FiBriefcase size={14} className="text-purple-600" />
+      <span className="hidden md:inline">{biz.name}</span>
+    </Link>
 
-        <Link
-          to="/dashboard/businesses/second-biz"
-          className="flex items-center justify-center md:justify-start gap-2 px-3 py-2 rounded-lg text-sm font-medium italic text-purple-900 bg-white shadow-md hover:shadow-lg hover:bg-purple-100 transition-all duration-200"
-        >
-          <FiBriefcase size={14} className="text-purple-600" />
-          <span className="hidden md:inline">Second Biz</span>
-        </Link>
+    {/* Small edit/delete icons on the same card */}
+    <div className="flex gap-1 ml-2">
+      <button
+        onClick={() => handleEditBusiness(biz.id)}
+        className="text-blue-500 hover:text-blue-700 p-1 rounded transition"
+        title="Edit Business"
+      >
+        <FiEdit size={14} />
+      </button>
 
-        {/* Add New Business button inside dropdown */}
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center justify-center md:justify-start gap-2 px-3 py-2 rounded-lg text-sm font-medium italic text-purple-900 bg-purple-500 hover:bg-purple-600 text-white transition-all shadow-md"
-        >
-          <FiPlus size={14} />
-          <span className="hidden md:inline">Add New Business</span>
-        </button>
-      </div>
+      <button
+        onClick={() => handleDeleteBusiness(biz.id)}
+        className="text-red-500 hover:text-red-700 p-1 rounded transition"
+        title="Delete Business"
+      >
+        <FiTrash2 size={14} />
+      </button>
+    </div>
+  </div>
+))
+
+
+
     )}
+
+    {/* Add New Business button */}
+    <button
+      onClick={() => setShowModal(true)}
+      className="flex items-center justify-center md:justify-start gap-2 px-3 py-2 rounded-lg text-sm font-medium italic text-purple-900 bg-purple-500 hover:bg-purple-600 text-white transition-all shadow-md"
+    >
+      <FiPlus size={14} />
+      <span className="hidden md:inline">Add New Business</span>
+    </button>
+  </div>
+)}
+
   </div>
 
   {/* Navigation */}
@@ -162,6 +246,9 @@ export default function Sidebar() {
         <h2 className="text-lg font-bold mb-4 text-purple-600">
           Add New Business
         </h2>
+        {error && (
+  <p className="text-red-500 text-sm mb-2">{error}</p>
+)}
         <input
           type="text"
           value={newBusiness}
