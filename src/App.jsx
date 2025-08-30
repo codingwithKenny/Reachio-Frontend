@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 // Pages
 import LandingPage from "./pages/LandingPage";
@@ -34,16 +39,29 @@ function App() {
           path="/dashboard/*"
           element={
             <PrivateRoute>
-              <Dashboard /> {/* Your Dashboard already has <Outlet /> */}
+              <Dashboard />
             </PrivateRoute>
           }
         >
-          <Route index element={<Home />} />
-          <Route path="customers" element={<CustomerDetails />} />
-          <Route path="messages" element={<Messages />} />
-          <Route path="leaflet" element={<Leaflet />} />
-          <Route path="campaigns" element={<Campaign />} />
-          <Route path="templates" element={<Template />} />
+          {/* Default redirect if user just goes to /dashboard */}
+          <Route index element={<Navigate to="businesses/1/home" replace />} />
+
+          {/* Business-specific routes */}
+          <Route path="businesses/:businessId/home" element={<Home />} />
+          <Route
+            path="businesses/:businessId/customers"
+            element={<CustomerDetails />}
+          />
+          <Route path="businesses/:businessId/messages" element={<Messages />} />
+          <Route path="businesses/:businessId/leaflet" element={<Leaflet />} />
+          <Route
+            path="businesses/:businessId/campaigns"
+            element={<Campaign />}
+          />
+          <Route
+            path="businesses/:businessId/templates"
+            element={<Template />}
+          />
         </Route>
 
         {/* Catch-all */}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Topbar from "../components/Common/Topbar";
+import { useOutletContext } from "react-router-dom";
 import WelcomeSection from "../components/Home/WelcomeSection";
 import StatsCards from "../components/Home/StatsCards";
 import QuickActions from "../components/Home/QuickActions";
@@ -7,20 +7,16 @@ import RecentActivity from "../components/Home/RecentActivity";
 import CustomerChart from "../components/Home/CustomerChart";
 import ReachCredits from "../components/Home/ReachCredits";
 
+const Home = () => {
+  const { selectedBusiness } = useOutletContext(); // ✅ get from Dashboard
 
-const Home = ({ selectedBusiness }) => {
+  const [reachCredits, setReachCredits] = useState({ used: 120, total: 500 });
   const [stats] = useState({
     customers: 124,
     campaigns: 5,
     messages: 12,
     revenue: 8500,
   });
-
-  const [reachCredits, setReachCredits] = useState({
-    used: 120,
-    total: 500,
-  });
-
   const [chartData] = useState([
     { day: "Mon", customers: 5 },
     { day: "Tue", customers: 8 },
@@ -31,13 +27,10 @@ const Home = ({ selectedBusiness }) => {
     { day: "Sun", customers: 9 },
   ]);
 
-  const handleBuyCredits = () => {
-    alert("Redirect to purchase page or open payment modal");
-  };
+  const handleBuyCredits = () => alert("Redirect to purchase page or open payment modal");
 
   return (
     <div className="p-6 md:p-10 space-y-6">
-      {/* <Topbar /> */}
       <WelcomeSection selectedBusiness={selectedBusiness} />
       <ReachCredits reachCredits={reachCredits} handleBuyCredits={handleBuyCredits} />
       <StatsCards stats={stats} />

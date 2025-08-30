@@ -6,7 +6,7 @@ const WelcomeSection = ({ selectedBusiness }) => {
       <div className="w-full md:w-auto text-center md:text-left">
         <h1 className="text-2xl md:text-3xl font-bold">Hello, Ridwat! 👋</h1>
         <p className="mt-1 italic">
-          You are managing: <span className="font-semibold">{selectedBusiness}</span>
+          You are managing: <span className="font-semibold">{selectedBusiness?.name}</span>
         </p>
       </div>
       <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto justify-center md:justify-start">

@@ -1,9 +1,11 @@
 import React from "react";
 
-const Topbar = () => {
+const Topbar = ({ selectedBusiness }) => {
   return (
     <header className="flex items-center justify-between bg-white p-4 rounded-2xl shadow">
-      <h1 className="text-xl md:text-2xl font-bold">Dashboard</h1>
+      <h1 className="text-xl md:text-2xl font-bold">
+        {selectedBusiness ? selectedBusiness.name : "No Business Selected"}
+      </h1>
       <div className="flex items-center gap-4">
         <input
           type="text"

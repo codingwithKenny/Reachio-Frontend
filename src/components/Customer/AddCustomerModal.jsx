@@ -20,6 +20,7 @@ const AddCustomerModal = ({ isOpen, onClose, onSubmit, selectedBusinessId }) => 
     };
 
     onSubmit(customerData);
+    console.log(customerData)
 
     // Reset form and close modal
     setName("");

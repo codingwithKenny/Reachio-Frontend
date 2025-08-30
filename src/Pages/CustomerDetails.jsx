@@ -1,23 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CustomerList from "../components/Customer/CustomerList";
 import CustomerStatsCards from "../components/Customer/CustomerStatsCards";
 import AddCustomerModal from "../components/Customer/AddCustomerModal";
-
-
+import { useParams } from "react-router-dom";
 
 const CustomerDetails = ({ selectedBusinessId }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+      const { businessId } = useParams(); // 👈 current business from URL
 
-  const handleAddCustomer = (customerData) => {
-    console.log("Send to backend:", customerData);
-    // Call your API or Prisma function to save customer
+
+  // Fetch customers for selected business
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/customers?businessId=${businessId}`
+        );
+        const data = await res.json();
+        setCustomers(data);
+      } catch (err) {
+        console.error("Error fetching customers:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (selectedBusinessId) fetchCustomers();
+  }, [selectedBusinessId]);
+
+  // Add new customer
+  const handleAddCustomer = async (customerData) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/customer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(customerData,businessId),
+      });
+      const newCustomer = await res.json();
+      setCustomers((prev) => [...prev, newCustomer]); // add to list
+    } catch (err) {
+      console.error("Error adding customer:", err);
+    }
   };
 
+  // Stats
   const stats = {
-    total: 124,
-    active: 98,
-    inactive: 26,
-    recent: 5,
+    total: customers.length,
+    active: customers.filter(c => c.active !== false).length,
+    inactive: customers.filter(c => c.active === false).length,
+    recent: customers.slice(-5).length,
   };
 
   return (
@@ -37,8 +70,7 @@ const CustomerDetails = ({ selectedBusinessId }) => {
       <CustomerStatsCards stats={stats} />
 
       {/* Customer List */}
-      <CustomerList/>
-      {/* ... your customer table here ... */}
+      <CustomerList customers={customers} loading={loading} />
 
       {/* Add Customer Modal */}
       <AddCustomerModal
