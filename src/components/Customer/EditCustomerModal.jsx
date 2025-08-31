@@ -3,33 +3,36 @@ import React, { useState, useEffect } from "react";
 const EditCustomerModal = ({ isOpen, onClose, onSubmit, customer }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phoneNumber, setPhone] = useState("");
   const [birthday, setBirthday] = useState("");
 
   useEffect(() => {
     if (customer) {
       setName(customer.name || "");
       setEmail(customer.email || "");
-      setPhone(customer.phone || "");
+      setPhone(customer.phoneNumber || "");
       setBirthday(customer.birthday ? customer.birthday.split("T")[0] : "");
     }
   }, [customer]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!name.trim()) return alert("Name is required");
+ const handleSubmit = (e) => {
+  e.preventDefault();
+  if (!name.trim()) return alert("Name is required");
 
-    const updatedData = {
-      ...customer,
-      name,
-      email: email || null,
-      phone: phone || null,
-      birthday: birthday ? new Date(birthday) : null,
-    };
-
-    onSubmit(updatedData);
-    onClose();
+  const updatedData = {
+    id: customer.id, // ensure id is included
+    name: name.trim(),
+    email: email.trim() || null,
+    phoneNumber: phoneNumber.trim() || null,
+    birthday: birthday || null, // keep as string, backend can parse
+    businessId: customer.businessId, // include businessId
+    status: customer.status, // optional if you have status
   };
+
+  onSubmit(updatedData); // pass to parent
+  onClose();
+};
+
 
   if (!isOpen) return null;
 
@@ -64,7 +67,7 @@ const EditCustomerModal = ({ isOpen, onClose, onSubmit, customer }) => {
             <label className="block text-sm font-semibold mb-1">Phone</label>
             <input
               type="tel"
-              value={phone}
+              value={phoneNumber}
               onChange={(e) => setPhone(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
             />

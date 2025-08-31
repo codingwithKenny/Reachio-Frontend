@@ -3,7 +3,7 @@ import React, { useState } from "react";
 const AddCustomerModal = ({ isOpen, onClose, onSubmit, selectedBusinessId }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phoneNumber, setPhone] = useState("");
   const [birthday, setBirthday] = useState("");
 
   const handleSubmit = (e) => {
@@ -14,9 +14,9 @@ const AddCustomerModal = ({ isOpen, onClose, onSubmit, selectedBusinessId }) => 
     const customerData = {
       name,
       email: email || null,
-      phone: phone || null,
+      phoneNumber: phoneNumber || null,
       birthday: birthday ? new Date(birthday) : null,
-      businessId: selectedBusinessId,
+    // businessId: selectedBusinessId, // include this here
     };
 
     onSubmit(customerData);
@@ -65,9 +65,10 @@ const AddCustomerModal = ({ isOpen, onClose, onSubmit, selectedBusinessId }) => 
             <label className="block text-sm font-semibold mb-1">Phone</label>
             <input
               type="tel"
-              value={phone}
+              value={phoneNumber}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="Phone (optional)"
+              placeholder="PhoneNumber"
+              required
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
             />
           </div>

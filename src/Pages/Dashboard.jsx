@@ -18,12 +18,14 @@ export default function Dashboard() {
 
     const fetchBusinesses = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/business?userId=${userId}`);
+        const res = await fetch(
+          `http://localhost:5000/api/business?userId=${userId}`
+        );
         const data = await res.json();
         setBusinesses(data);
 
         // set selected business by ID from URL
-        const selected = data.find(b => b.id === parseInt(businessId));
+        const selected = data.find((b) => b.id === parseInt(businessId));
         setSelectedBusiness(selected || null);
       } catch (err) {
         console.error("Error fetching businesses", err);
@@ -40,7 +42,11 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen rounded-3xl bg-purple-100">
-      <Sidebar />
+      <Sidebar
+        businesses={businesses} // Pass list of businesses
+        setBusinesses={setBusinesses} // Pass setter so Sidebar can update
+        businessId={selectedBusiness.id}
+      />
       <div className="flex-1 flex flex-col overflow-hidden ml-20 md:ml-64">
         <div className="mt-2">
           <Topbar selectedBusiness={selectedBusiness} />

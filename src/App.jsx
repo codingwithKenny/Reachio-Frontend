@@ -18,6 +18,7 @@ import Leaflet from "./Pages/Leaflet";
 import Campaign from "./Pages/Campaign";
 import Template from "./Pages/Template";
 import NotFound from "./pages/NotFound";
+import CreateBusiness from "./Pages/CreateBusiness";
 
 // PrivateRoute wrapper
 const PrivateRoute = ({ children }) => {
@@ -33,6 +34,16 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Protected create-business route */}
+        <Route
+          path="/create-business"
+          element={
+            <PrivateRoute>
+              <CreateBusiness/>
+            </PrivateRoute>
+          }
+        />
 
         {/* Protected dashboard routes */}
         <Route
